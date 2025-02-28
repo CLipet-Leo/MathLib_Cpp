@@ -1,7 +1,7 @@
 #include <iostream>
 #include <string>
 
-#include "Test.cpp"
+#include "Test.h"
 
 int main()
 {

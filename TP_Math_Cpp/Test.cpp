@@ -1,6 +1,8 @@
-﻿#include "MathLib.h"
+﻿#include "Test.h"
 
-static void testProdMat()
+#include "MathLib.h"
+
+void testProdMat()
 {
     Matrix m1 = MathLib::createMatrix(2, 3);
     m1.data[0][0] = 1;
@@ -25,7 +27,7 @@ static void testProdMat()
     MathLib::deleteMatrix(m3);
 }
 
-static void testInversedMatrix()
+void testInversedMatrix()
 {
     Matrix m = MathLib::createMatrix(3, 3);
     m.data[0][0] = 1;
@@ -61,7 +63,7 @@ static void testInversedMatrix()
     MathLib::deleteMatrix(inversed);
 }
 
-static void testTranslation()
+void testTranslation()
 {
     float m = 0.1f;
     float h = 0.1f;
@@ -76,7 +78,7 @@ static void testTranslation()
     result.print();
 }
 
-static void testRotation()
+void testRotation()
 {
     float h = 0.1f;
     FVector* F = new FVector[3]{ FVector(2.f, 0.f, 0.f), FVector(0.f, 3.f, 0.f), FVector(1.f, 1.f, 1.f) };
