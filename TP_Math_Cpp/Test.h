@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-void testMatrix();
+void testProdMat();
 void testInversedMatrix();
 void testTranslation();
 void testRotation();
