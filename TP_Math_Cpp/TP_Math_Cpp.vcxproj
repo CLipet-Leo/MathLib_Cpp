@@ -130,11 +130,13 @@
     <ClCompile Include="FVector.cpp" />
     <ClCompile Include="MathLib.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Matrix.cpp" />
     <ClCompile Include="Test.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="FVector.h" />
     <ClInclude Include="MathLib.h" />
+    <ClInclude Include="Matrix.h" />
     <ClInclude Include="StructHeader.h" />
     <ClInclude Include="Test.h" />
   </ItemGroup>

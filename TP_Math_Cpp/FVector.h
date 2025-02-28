@@ -2,7 +2,8 @@
 
 #include <iostream>
 #include <string>
-#include "StructHeader.h"
+
+class Matrix;
 
 class FVector
 {
@@ -11,22 +12,23 @@ public:
 	FVector(float X, float Y, float Z);
 	virtual ~FVector() = default;
 
+	// Conversion operators
 	FVector operator+(const FVector& other) const;
 	FVector operator-(const FVector& other) const;
 	FVector operator*(const FVector& other) const;
+	FVector operator*(const Matrix& matrix) const;
+	FVector operator*(float value) const;
+	FVector operator/(float value) const;
 
 	std::string ToString() const;
 
 	static FVector Zero() { return FVector(0, 0, 0); }
 
 	static FVector distance(const FVector& u, const FVector& v);
-	static FVector prodValue(const FVector& v, float value);
-	static FVector divValue(const FVector& v, float value);
 	static FVector prodVect(const FVector& u, const FVector& v);
-	static FVector prodMatrix(const FVector& v, const Matrix& m);
 	static FVector moment(const FVector& F, const FVector& A, const FVector& G);
 
-	// Getters pour X, Y et Z
+	// Getters
 	float getX() const { return X; }
 	float getY() const { return Y; }
 	float getZ() const { return Z; }
