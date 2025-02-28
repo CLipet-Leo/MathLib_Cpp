@@ -20,12 +20,12 @@ void MathLib::deleteMatrix(Matrix& m) {
 }
 
 void MathLib::printMatrix(const Matrix& m, const char* text) {
-	std::cout << text << std::endl;
+	std::cout << text << '\n';
 	for (int i = 0; i < m.rows; i++) {
 		for (int j = 0; j < m.cols; j++) {
 			std::cout << m.data[i][j] << " ";
 		}
-		std::cout << std::endl;
+		std::cout << '\n';
 	}
 }
 

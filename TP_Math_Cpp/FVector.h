@@ -44,9 +44,9 @@ struct DoubleVector {
 	DoubleVector(FVector v1, FVector v2) : v1(v1), v2(v2) {}
 
 	int print() const {
-		std::cout << "DoubleVector" << std::endl;
-		std::cout << "v1: " << v1.ToString() << std::endl;
-		std::cout << "v2: " << v2.ToString() << std::endl;
+		std::cout << "DoubleVector" << '\n';
+		std::cout << "v1: " << v1.ToString() << '\n';
+		std::cout << "v2: " << v2.ToString() << '\n';
 		return 0;
 	}
 };

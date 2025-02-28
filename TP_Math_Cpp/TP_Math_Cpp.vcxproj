@@ -130,6 +130,7 @@
     <ClCompile Include="FVector.cpp" />
     <ClCompile Include="MathLib.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Test.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="FVector.h" />

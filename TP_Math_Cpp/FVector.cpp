@@ -36,32 +36,34 @@ std::string FVector::ToString() const
 
 FVector FVector::distance(const FVector& u, const FVector& v)
 {
-	return FVector(std::abs(u.X - v.X), std::abs(u.Y - v.Y), std::abs(u.Z - v.Z));
+	return {std::abs(u.X - v.X), std::abs(u.Y - v.Y), std::abs(u.Z - v.Z)};
 }
 
 FVector FVector::prodValue(const FVector& v, float value)
 {
-	return FVector(v.X * value, v.Y * value, v.Z * value);
+	return {v.X * value, v.Y * value, v.Z * value};
 }
 
 FVector FVector::divValue(const FVector& v, float value)
 {
-	return FVector(v.X / value, v.Y / value, v.Z / value);
+	return {v.X / value, v.Y / value, v.Z / value};
 }
 
 FVector FVector::prodVect(const FVector& u, const FVector& v)
 {
-	return FVector(u.Y * v.Z - u.Z * v.Y, u.Z * v.X - u.X * v.Z, u.X * v.Y - u.Y * v.X);
+	return {u.Y * v.Z - u.Z * v.Y, u.Z * v.X - u.X * v.Z, u.X * v.Y - u.Y * v.X};
 }
 
 FVector FVector::prodMatrix(const FVector& v, const Matrix& m)
 {
-	return FVector(v.X * m.data[0][0] + v.Y * m.data[0][1] + v.Z * m.data[0][2],
+	return {
+		v.X * m.data[0][0] + v.Y * m.data[0][1] + v.Z * m.data[0][2],
 		v.X * m.data[1][0] + v.Y * m.data[1][1] + v.Z * m.data[1][2],
-		v.X * m.data[2][0] + v.Y * m.data[2][1] + v.Z * m.data[2][2]);
+		v.X * m.data[2][0] + v.Y * m.data[2][1] + v.Z * m.data[2][2]
+	};
 }
 
 FVector FVector::moment(const FVector& F, const FVector& A, const FVector& G)
 {
-	return FVector::prodVect((A - G), F);
+	return prodVect((A - G), F);
 }
