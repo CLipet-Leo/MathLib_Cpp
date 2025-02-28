@@ -4,8 +4,9 @@ int main()
 {
 	//testProdMat();
 	//testInversedMatrix();
-	testTranslation();
+	//testTranslation();
 	//testRotation();
+	testInertia();
 
 	return 0;
 }

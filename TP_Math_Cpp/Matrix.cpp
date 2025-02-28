@@ -61,6 +61,17 @@ Matrix Matrix::operator*(float value) const
     return result;
 }
 
+Matrix Matrix::operator+(const Matrix& other) const
+{
+    if (rows != other.getRows() || cols != other.getCols())
+        throw std::invalid_argument("Matrix dimensions do not match for addition.");
+    Matrix result(rows, cols);
+    for (int i = 0; i < rows; i++)
+        for (int j = 0; j < cols; j++)
+            result[i][j] = data[i][j] + other[i][j];
+    return result;
+}
+
 std::string Matrix::ToString() const
 {
     std::ostringstream oss;

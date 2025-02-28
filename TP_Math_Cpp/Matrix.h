@@ -13,6 +13,7 @@ public:
     const float* operator[](int row) const;
     Matrix operator*(const Matrix& other) const;
     Matrix operator*(float value) const;
+    Matrix operator+(const Matrix& other) const;
 
     // Getters
     int getRows() const { return rows; }

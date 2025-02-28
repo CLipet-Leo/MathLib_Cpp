@@ -1,5 +1,6 @@
 ﻿#include "Test.h"
 
+#include <array>
 #include "MathLib.h"
 
 void testProdMat()
@@ -73,9 +74,9 @@ void testTranslation()
 void testRotation()
 {
     float h = 0.1f;
-    FVector* F = new FVector[3]{ FVector(2.f, 0.f, 0.f), FVector(0.f, 3.f, 0.f), FVector(1.f, 1.f, 1.f) };
-    FVector* A = new FVector[3]{ FVector(1.f, 2.f, 0.f), FVector(-1.f, -2.f, 1.f), FVector(0.f, 1.f, -1.f) };
-    FVector G = FVector(0.f, 0.f, 0.f);
+    const std::vector<FVector> F{FVector(2.f, 0.f, 0.f), FVector(0.f, 3.f, 0.f), FVector(1.f, 1.f, 1.f)};
+    const std::vector<FVector> A{FVector(1.f, 2.f, 0.f), FVector(-1.f, -2.f, 1.f), FVector(0.f, 1.f, -1.f)};
+    const auto G = FVector(0.f, 0.f, 0.f);
     Matrix I(3, 3);
     /*
     2 0 0
@@ -91,12 +92,25 @@ void testRotation()
     I[2][0] = 0;
     I[2][1] = 0;
     I[2][2] = 4;
-    FVector teta = FVector(0.1f, 0.2f, 0.3f);
-    FVector tetap = FVector(0.05f, -0.1f, 0.2f);
+    const auto teta = FVector(0.1f, 0.2f, 0.3f);
+    const auto tetap = FVector(0.05f, -0.1f, 0.2f);
 
-    DoubleVector result = MathLib::rotation(h, F, A, G, I, teta, tetap);
+    const DoubleVector result = MathLib::rotation(h, F, A, G, I, teta, tetap);
     result.print();
+}
 
-    delete[] F;
-    delete[] A;
+void testInertia()
+{
+    const std::vector<FVector> L = { FVector(1.f, 2.f, 3.f), FVector(4.f, 5.f, 6.f), FVector(7.f, 8.f, 9.f)};
+    const auto G = MathLib::centre_inert(L);
+    std::cout << "G: " << G.ToString() << '\n';
+
+    constexpr float m = 9.f;
+    const auto I = MathLib::matrice_inert(L, m);
+    MathLib::printMatrix(I, "Inertia matrix :");
+
+    const auto O = FVector(0.f, 0.f, 0.f);
+    const auto A = FVector(4.f, 5.f, 6.f);
+    const auto IAW = MathLib::deplace_matrix(I, m, O, A);
+    MathLib::printMatrix(IAW, "Replaced inertia matrix :");
 }
