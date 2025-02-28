@@ -127,14 +127,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="FVector.cpp" />
+    <ClCompile Include="FVector3.cpp" />
     <ClCompile Include="MathLib.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Matrix.cpp" />
     <ClCompile Include="Test.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="FVector.h" />
+    <ClInclude Include="FVector3.h" />
     <ClInclude Include="MathLib.h" />
     <ClInclude Include="Matrix.h" />
     <ClInclude Include="StructHeader.h" />

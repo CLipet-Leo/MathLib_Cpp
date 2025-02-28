@@ -1,34 +1,34 @@
-#include "FVector.h"
+#include "FVector3.h"
 #include <sstream>
 #include <cmath>
 #include "Matrix.h"
 
-FVector::FVector()
+FVector3::FVector3()
 	: X(0), Y(0), Z(0)
 {
 }
 
-FVector::FVector(float X, float Y, float Z)
+FVector3::FVector3(float X, float Y, float Z)
 	: X(X), Y(Y), Z(Z)
 {
 }
 
-FVector FVector::operator+(const FVector& other) const
+FVector3 FVector3::operator+(const FVector3& other) const
 {
 	return { X + other.getX(), Y + other.getY(), Z + other.getZ() };
 }
 
-FVector FVector::operator-(const FVector& other) const
+FVector3 FVector3::operator-(const FVector3& other) const
 {
 	return { X - other.getX(), Y - other.getY(), Z - other.getZ() };
 }
 
-FVector FVector::operator*(const FVector& other) const
+FVector3 FVector3::operator*(const FVector3& other) const
 {
 	return { X * other.getX(), Y * other.getY(), Z * other.getZ() };
 }
 
-FVector FVector::operator*(const Matrix& matrix) const
+FVector3 FVector3::operator*(const Matrix& matrix) const
 {
 	return {
 		X * matrix[0][0] + Y * matrix[0][1] + Z * matrix[0][2],
@@ -37,34 +37,34 @@ FVector FVector::operator*(const Matrix& matrix) const
 	};
 }
 
-FVector FVector::operator*(float value) const
+FVector3 FVector3::operator*(float value) const
 {
 	return { X * value, Y * value, Z * value };
 }
 
-FVector FVector::operator/(float value) const
+FVector3 FVector3::operator/(float value) const
 {
 	return { X / value, Y / value, Z / value };
 }
 
-std::string FVector::ToString() const
+std::string FVector3::ToString() const
 {
 	std::ostringstream oss;
 	oss << "X: " << X << ", Y: " << Y << ", Z: " << Z;
 	return oss.str();
 }
 
-FVector FVector::distance(const FVector& u, const FVector& v)
+FVector3 FVector3::distance(const FVector3& u, const FVector3& v)
 {
 	return {std::abs(u.X - v.X), std::abs(u.Y - v.Y), std::abs(u.Z - v.Z)};
 }
 
-FVector FVector::prodVect(const FVector& u, const FVector& v)
+FVector3 FVector3::prodVect(const FVector3& u, const FVector3& v)
 {
 	return {u.Y * v.Z - u.Z * v.Y, u.Z * v.X - u.X * v.Z, u.X * v.Y - u.Y * v.X};
 }
 
-FVector FVector::moment(const FVector& F, const FVector& A, const FVector& G)
+FVector3 FVector3::moment(const FVector3& F, const FVector3& A, const FVector3& G)
 {
 	return prodVect((A - G), F);
 }

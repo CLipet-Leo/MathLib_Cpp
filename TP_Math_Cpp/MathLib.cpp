@@ -21,11 +21,11 @@ float MathLib::solve1(float f, float fp, float h)
 * @param G : inertia center
 * @param v : speed
 */
-DoubleVector MathLib::translation(float m, float h, const FVector& F, const FVector& G, const FVector& v)
+DoubleVector3 MathLib::translation(float m, float h, const FVector3& F, const FVector3& G, const FVector3& v)
 {
-	FVector accel = F / m;
-	FVector newV = accel * h + v;
-	FVector newG = newV * h + G;
+	FVector3 accel = F / m;
+	FVector3 newV = accel * h + v;
+	FVector3 newG = newV * h + G;
 	return { newG, newV };
 }
 
@@ -38,19 +38,19 @@ DoubleVector MathLib::translation(float m, float h, const FVector& F, const FVec
 * @param teta : angle
 * @param tetap : angular speed
 */
-DoubleVector MathLib::rotation(float h, const std::vector<FVector>& F, const std::vector<FVector>& A, const FVector& G, const Matrix& I, const FVector& teta, const FVector& tetap)
+DoubleVector3 MathLib::rotation(float h, const std::vector<FVector3>& F, const std::vector<FVector3>& A, const FVector3& G, const Matrix& I, const FVector3& teta, const FVector3& tetap)
 {
 	if (F.size() != A.size())
 		throw std::invalid_argument("F and A must have the same size");
 	
-	FVector newG = FVector::Zero();
+	FVector3 newG = FVector3::Zero();
 	for (int i = 0; i < F.size(); ++i)
-		newG = newG + FVector::moment(F[i], A[i], G);
+		newG = newG + FVector3::moment(F[i], A[i], G);
 
 	// Angular acceleration
-	FVector omegaDot = newG * Matrix::inverse(I);
-	FVector newTetap = tetap + omegaDot * h;
-	FVector newTeta = teta + newTetap * h;
+	FVector3 omegaDot = newG * Matrix::inverse(I);
+	FVector3 newTetap = tetap + omegaDot * h;
+	FVector3 newTeta = teta + newTetap * h;
 
 	return { newTeta, newTetap };
 }
@@ -60,12 +60,12 @@ DoubleVector MathLib::rotation(float h, const std::vector<FVector>& F, const std
  * @param L : List of points
  * @return : Center of inertia
  */
-FVector MathLib::centre_inert(const std::vector<FVector>& L)
+FVector3 MathLib::centre_inert(const std::vector<FVector3>& L)
 {
-	FVector G = FVector::Zero();
+	FVector3 G = FVector3::Zero();
 	for (const auto& i : L)
 		G = G + i;
-	return G / L.size();
+	return G / static_cast<float>(L.size());
 }
 
 /**
@@ -74,7 +74,7 @@ FVector MathLib::centre_inert(const std::vector<FVector>& L)
  * @param m Total mass
  * @return The inertia matrix
  */
-Matrix MathLib::matrice_inert(const std::vector<FVector>& L, float m)
+Matrix MathLib::matrice_inert(const std::vector<FVector3>& L, float m)
 {
 	float massPerPoint = m / L.size();
 	float A = 0, B = 0, C = 0, D = 0, E = 0, F = 0;
@@ -100,11 +100,11 @@ Matrix MathLib::matrice_inert(const std::vector<FVector>& L, float m)
 	return I;
 }
 
-Matrix MathLib::deplace_matrix(const Matrix& I, float m, const FVector& O, const FVector& A)
+Matrix MathLib::deplace_matrix(const Matrix& I, float m, const FVector3& O, const FVector3& A)
 {
 	if (I.getRows() != 3 || I.getCols() != 3)
 		throw std::invalid_argument("Matrix must be 3x3");
-	const FVector OA = FVector::distance(O, A);
+	const FVector3 OA = FVector3::distance(O, A);
 	Matrix IOA(3, 3);
 	IOA[0][0] = m * (pow(OA.getY(), 2.f) + pow(OA.getZ(), 2.f));
 	IOA[0][1] = -m * OA.getX() * OA.getY();
