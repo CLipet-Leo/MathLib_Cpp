@@ -1,5 +1,7 @@
 ﻿#include "Matrix.h"
 
+#include <algorithm>
+#include <iomanip>
 #include <iostream>
 #include <stdexcept>
 #include <sstream>
@@ -81,12 +83,31 @@ Matrix Matrix::operator+(const Matrix& other) const
 std::string Matrix::ToString() const
 {
     std::ostringstream oss;
+    auto colWidths = new int[cols]();
+    
+    // Calculate the maximum width for each column
+    for (int j = 0; j < cols; j++)
+    {
+        for (int i = 0; i < rows; i++)
+        {
+            std::ostringstream temp;
+            temp << data[i][j];
+            int width = temp.str().length();
+            colWidths[j] = std::max(width, colWidths[j]);
+        }
+    }
+
+    // Print the matrix with proper column widths
     for (int i = 0; i < rows; i++)
     {
         for (int j = 0; j < cols; j++)
-            oss << getData()[i][j] << " ";
+        {
+            oss << std::setw(colWidths[j]) << data[i][j] << "|";
+        }
         oss << "\n";
     }
+
+    delete[] colWidths;
     return oss.str();
 }
 

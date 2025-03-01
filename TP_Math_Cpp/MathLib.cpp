@@ -19,6 +19,40 @@ float MathLib::solve1(float f, float fp, float h)
 	return f + fp * h;
 }
 
+// Factorial function
+unsigned int MathLib::factoriel(unsigned int n)
+{
+	return n <= 1 ? 1 : n * factoriel(n - 1);
+}
+
+/**
+ * Cosinus function
+ * @param x : number
+ * @param n : iterations
+ * @return : cosinus of x
+ */
+float MathLib::cosinus(float x, int n)
+{
+	float cos_x = 0;
+	for (int i = 0; i < n; ++i)
+		cos_x += static_cast<float>(pow(-1, i) * pow(x, 2 * i) / factoriel(2 * i));
+	return cos_x;
+}
+
+/**
+ * Sinus function
+ * @param x : number
+ * @param n : iterations
+ * @return : sinus of x
+ */
+float MathLib::sinus(float x, int n)
+{
+	float sin_x = 0;
+	for (int i = 0; i < n; ++i)
+		sin_x += static_cast<float>(pow(-1, i) * pow(x, 2 * i + 1) / factoriel(2 * i + 1));
+	return sin_x;
+}
+
 /**
  * Translate an object with a mass, a time step, a sum of forces, an inertia center and a speed
 * @param m : mass
@@ -133,4 +167,32 @@ Matrix MathLib::deplace_matrix(const Matrix& I, float m, const FVector3& O, cons
 	IOA[2][1] = -m * OA.getY() * OA.getZ();
 	IOA[2][2] = m * (pow(OA.getX(), 2.f) + pow(OA.getY(), 2.f));
 	return I + IOA;
+}
+
+/**
+ * 
+ * @param n : number of points
+ * @param a : length
+ * @param b : width
+ * @param c : height
+ * @param A0 : first point
+ * @return : Matrix of points with 3 rows representing the coordinates X, Y and Z
+ */
+Matrix MathLib::pave_plein(unsigned int n, float a, float b, float c, const FVector3& A0)
+{
+	const int iteration = static_cast<int>(pow(n, 1.f / 3.f));
+	const float dx = a / (iteration - 1);
+	const float dy = b / (iteration - 1);
+	const float dz = c / (iteration - 1);
+	Matrix M(3, n);
+	for (int i = 0; i < iteration; ++i)
+		for (int j = 0; j < iteration; ++j)
+			for (int k = 0; k < iteration; ++k)
+			{
+				const int index = i * iteration * iteration + j * iteration + k;
+				M[0][index] = A0.getX() + i * dx;
+				M[1][index] = A0.getY() + j * dy;
+				M[2][index] = A0.getZ() + k * dz;
+			}
+	return M;
 }

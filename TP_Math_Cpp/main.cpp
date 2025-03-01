@@ -10,8 +10,10 @@ int main()
 	//testInversedMatrix();
 	//testTranslation();
 	//testRotation();
-	testInertia();
-
+	//testInertia();
+	//testPaveDroit();
+	testFactorielSinusCosinus();
+	
 	_CrtSetReportMode(_CRT_WARN, _CRTDBG_MODE_DEBUG); 
 	_CrtDumpMemoryLeaks();
 	return 0;

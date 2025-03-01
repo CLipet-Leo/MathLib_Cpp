@@ -113,3 +113,24 @@ void testInertia()
     const auto IAW = MathLib::deplace_matrix(I, m, O, A);
     MathLib::printMatrix(IAW, "Replaced inertia matrix :");
 }
+
+void testPaveDroit()
+{
+    const FVector3 A0(0.f, 0.f, 0.f);
+    constexpr unsigned int n = 8;
+    constexpr float a = 1.f;
+    constexpr float b = 2.f;
+    constexpr float c = 3.f;
+    const Matrix result = MathLib::pave_plein(n, a, b, c, A0);
+    MathLib::printMatrix(result, "Pave droit :");
+}
+
+void testFactorielSinusCosinus()
+{
+    constexpr float x = 0.1f;
+    constexpr int n = 5;
+
+    std::cout << "factoriel(" << n << ") = " << MathLib::factoriel(n) << " (vs std::tgammaf(" << n + 1 << ") = " << std::tgammaf(n + 1) << ")\n";
+    std::cout << "cos(" << x << ") = " << MathLib::cosinus(x, n) << " (vs std::cos(x) = " << std::cos(x) << ")\n";
+    std::cout << "sin(" << x << ") = " << MathLib::sinus(x, n) << " (vs std::sin(x) = " << std::sin(x) << ")\n";
+}
