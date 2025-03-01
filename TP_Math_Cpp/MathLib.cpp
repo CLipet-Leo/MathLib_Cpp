@@ -3,6 +3,11 @@
 #include <iostream>
 #include <string>
 
+/**
+ * Function to print a matrix
+ * @param m : Matrix to print
+ * @param text : Optional text before the matrix
+ */
 void MathLib::printMatrix(const Matrix& m, const char* text)
 {
 	std::cout << text << '\n' << m.ToString();
@@ -15,11 +20,13 @@ float MathLib::solve1(float f, float fp, float h)
 }
 
 /**
+ * Translate an object with a mass, a time step, a sum of forces, an inertia center and a speed
 * @param m : mass
 * @param h : time step
 * @param F : sum forces
 * @param G : inertia center
 * @param v : speed
+* @return : New position and speed
 */
 DoubleVector3 MathLib::translation(float m, float h, const FVector3& F, const FVector3& G, const FVector3& v)
 {
@@ -30,6 +37,7 @@ DoubleVector3 MathLib::translation(float m, float h, const FVector3& F, const FV
 }
 
 /**
+ * Rotate an object with a mass, a time step, a list of forces, a list of application points, an inertia center, an inertia matrix, an angle and an angular speed
 * @param h : time step
 * @param F : list of forces
 * @param A : list of application points
@@ -37,6 +45,7 @@ DoubleVector3 MathLib::translation(float m, float h, const FVector3& F, const FV
 * @param I : inertia matrix
 * @param teta : angle
 * @param tetap : angular speed
+* @return : New angle and angular speed
 */
 DoubleVector3 MathLib::rotation(float h, const std::vector<FVector3>& F, const std::vector<FVector3>& A, const FVector3& G, const Matrix& I, const FVector3& teta, const FVector3& tetap)
 {
@@ -45,7 +54,7 @@ DoubleVector3 MathLib::rotation(float h, const std::vector<FVector3>& F, const s
 	
 	FVector3 newG = FVector3::Zero();
 	for (int i = 0; i < F.size(); ++i)
-		newG = newG + FVector3::moment(F[i], A[i], G);
+		newG += FVector3::moment(F[i], A[i], G);
 
 	// Angular acceleration
 	FVector3 omegaDot = newG * Matrix::inverse(I);
@@ -56,7 +65,7 @@ DoubleVector3 MathLib::rotation(float h, const std::vector<FVector3>& F, const s
 }
 
 /**
- * 
+ * Calculate the center of inertia for a given list of points
  * @param L : List of points
  * @return : Center of inertia
  */
@@ -64,12 +73,12 @@ FVector3 MathLib::centre_inert(const std::vector<FVector3>& L)
 {
 	FVector3 G = FVector3::Zero();
 	for (const auto& i : L)
-		G = G + i;
+		G += i;
 	return G / static_cast<float>(L.size());
 }
 
 /**
- * 
+ * Calculate the inertia matrix for a given list of points and mass
  * @param L List of points
  * @param m Total mass
  * @return The inertia matrix
@@ -100,6 +109,14 @@ Matrix MathLib::matrice_inert(const std::vector<FVector3>& L, float m)
 	return I;
 }
 
+/**
+ * Move a matrix
+ * @param I : Matrix to deplace
+ * @param m : mass
+ * @param O : point O
+ * @param A : point A
+ * @return : Deplaced matrix
+ */
 Matrix MathLib::deplace_matrix(const Matrix& I, float m, const FVector3& O, const FVector3& A)
 {
 	if (I.getRows() != 3 || I.getCols() != 3)

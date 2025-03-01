@@ -1,10 +1,9 @@
 #pragma once
 
-#include <vector>
-
 #include "Matrix.h"
 #include "FVector3.h"
-#include "StructHeader.h"
+
+#include <vector>
 
 namespace MathLib
 {
