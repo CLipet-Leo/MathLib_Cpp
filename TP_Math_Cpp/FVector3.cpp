@@ -13,6 +13,20 @@ FVector3::FVector3(float X, float Y, float Z)
 {
 }
 
+FVector3& FVector3::operator=(const FVector3& other) {
+	if (this != &other) {
+		X = other.X;
+		Y = other.Y;
+		Z = other.Z;
+	}
+	return *this;
+}
+
+FVector3& FVector3::operator+=(const FVector3& other)
+{
+	return *this = *this + other;
+}
+
 FVector3 FVector3::operator+(const FVector3& other) const
 {
 	return { X + other.getX(), Y + other.getY(), Z + other.getZ() };

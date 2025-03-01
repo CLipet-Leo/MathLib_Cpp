@@ -5,14 +5,20 @@
 
 class Matrix;
 
+/**
+ * A class to represent a 3D vector with float values
+ */
 class FVector3
 {
 public:
 	FVector3();
 	FVector3(float X, float Y, float Z);
+	FVector3(const FVector3& other) = default;
 	virtual ~FVector3() = default;
 
 	// Conversion operators
+	FVector3& operator=(const FVector3& other);
+	FVector3& operator+=(const FVector3& other);
 	FVector3 operator+(const FVector3& other) const;
 	FVector3 operator-(const FVector3& other) const;
 	FVector3 operator*(const FVector3& other) const;
@@ -39,6 +45,7 @@ private:
 	float Z;
 };
 
+// Struct to hold two FVector3 objects
 struct DoubleVector3 {
 	FVector3 v1;
 	FVector3 v2;
