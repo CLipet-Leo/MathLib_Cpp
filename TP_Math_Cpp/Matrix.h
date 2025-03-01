@@ -1,14 +1,21 @@
 ﻿#pragma once
-#include <iostream>
+
 #include <string>
 
+
+/**
+ * Class to represent a matrix with float values
+ */
 class Matrix
 {
 public:
     Matrix(int rows, int cols);
+    Matrix(const Matrix& other) = default;
     virtual ~Matrix();
 
     // Conversion operators
+    Matrix& operator=(const Matrix& other) = default;
+    Matrix& operator+=(const Matrix& other);
     float* operator[](int row);
     const float* operator[](int row) const;
     Matrix operator*(const Matrix& other) const;

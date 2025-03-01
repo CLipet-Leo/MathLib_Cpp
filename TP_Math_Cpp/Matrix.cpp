@@ -1,5 +1,6 @@
 ﻿#include "Matrix.h"
 
+#include <iostream>
 #include <stdexcept>
 #include <sstream>
 
@@ -20,6 +21,11 @@ Matrix::~Matrix()
     for (int i = 0; i < rows; i++)
         delete[] data[i];
     delete[] data;
+}
+
+Matrix& Matrix::operator+=(const Matrix& other)
+{
+    return *this = *this + other;
 }
 
 float* Matrix::operator[](int row)
@@ -115,7 +121,7 @@ float Matrix::deter(const Matrix& m)
     {
         int j = 0;
         for (int i = 0; i < m.getRows(); i++)
-            determinant += pow(-1, i + j) * m[i][j] * deter(subMatrix(m, i, j));
+            determinant += static_cast<float>(pow(-1, i + j) * m[i][j] * deter(subMatrix(m, i, j)));
     }
     return determinant;
 }
@@ -129,7 +135,7 @@ Matrix Matrix::com(const Matrix& m)
     {
         for (int j = 0; j < m.getCols(); j++)
         {
-            comatrix[i][j] = pow(-1, i + j) * deter(subMatrix(m, i, j));
+            comatrix[i][j] = static_cast<float>(pow(-1, i + j) * deter(subMatrix(m, i, j)));
         }
     }
     return comatrix;
