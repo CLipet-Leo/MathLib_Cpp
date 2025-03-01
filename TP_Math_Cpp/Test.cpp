@@ -1,6 +1,5 @@
 ﻿#include "Test.h"
 
-#include <array>
 #include "MathLib.h"
 
 void testProdMat()
