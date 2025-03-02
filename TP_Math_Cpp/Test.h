@@ -7,3 +7,4 @@ void testRotation();
 void testInertia();
 void testPaveDroit();
 void testFactorielSinusCosinus();
+void testCercle();

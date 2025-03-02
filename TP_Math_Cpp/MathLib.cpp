@@ -20,9 +20,12 @@ float MathLib::solve1(float f, float fp, float h)
 }
 
 // Factorial function
-unsigned int MathLib::factoriel(unsigned int n)
+unsigned long long MathLib::factoriel(unsigned int n)
 {
-	return n <= 1 ? 1 : n * factoriel(n - 1);
+	unsigned long long result = 1;
+	for (unsigned int i = 2; i <= n; ++i)
+		result *= i;
+	return result;
 }
 
 /**
@@ -31,11 +34,19 @@ unsigned int MathLib::factoriel(unsigned int n)
  * @param n : iterations
  * @return : cosinus of x
  */
-float MathLib::cosinus(float x, int n)
+double MathLib::cosinus(double x, int n)
 {
-	float cos_x = 0;
-	for (int i = 0; i < n; ++i)
-		cos_x += static_cast<float>(pow(-1, i) * pow(x, 2 * i) / factoriel(2 * i));
+	double cos_x = 1.0; // First term of the Taylor series
+	double power_x = 1.0; // x^0 = 1
+	double factorial = 1.0; // 0! = 1
+	int sign = 1; // (-1)^i
+	for (int i = 1; i < n; ++i)
+	{
+		power_x *= x * x; // x^(2*i)
+		factorial *= (2 * i - 1) * (2 * i); // (2*i)!
+		sign = -sign; // Switch between + and -
+		cos_x += sign * (power_x / factorial);
+	}
 	return cos_x;
 }
 
@@ -45,11 +56,19 @@ float MathLib::cosinus(float x, int n)
  * @param n : iterations
  * @return : sinus of x
  */
-float MathLib::sinus(float x, int n)
+double MathLib::sinus(double x, int n)
 {
-	float sin_x = 0;
-	for (int i = 0; i < n; ++i)
-		sin_x += static_cast<float>(pow(-1, i) * pow(x, 2 * i + 1) / factoriel(2 * i + 1));
+	double sin_x = x; // First term of the Taylor series
+	double power_x = x; // x^1 = x
+	double factorial = 1.0; // 1! = 1
+	int sign = 1; // (-1)^i
+	for (int i = 1; i < n; ++i)
+	{
+		power_x *= x * x; // x^(2*i+1)
+		factorial *= 2 * i * (2 * i + 1); // (2*i+1)!
+		sign = -sign; // Switch between + and -
+		sin_x += sign * (power_x / factorial);
+	}
 	return sin_x;
 }
 
@@ -170,7 +189,7 @@ Matrix MathLib::deplace_matrix(const Matrix& I, float m, const FVector3& O, cons
 }
 
 /**
- * 
+ * Create a matrix of points in a geometrical shape
  * @param n : number of points
  * @param a : length
  * @param b : width
@@ -194,5 +213,42 @@ Matrix MathLib::pave_plein(unsigned int n, float a, float b, float c, const FVec
 				M[1][index] = A0.getY() + j * dy;
 				M[2][index] = A0.getZ() + k * dz;
 			}
+	return M;
+}
+
+/**
+ * Create a matrix of points in a circle
+ * @param R : radius
+ * @param A0 : first point
+ * @param n : number of points
+ * @return : Matrix of points with 3 rows representing the coordinates X, Y and Z
+ */
+Matrix MathLib::cercle_plein(float R, const FVector3& A0, int n)
+{
+	int n_r = static_cast<int>(std::sqrt(n)); // Subdivisions for the radius
+	int n_t = std::max(1, n / n_r); // Subdivisions for the angle
+	Matrix M(3, n);
+	int index = 0;
+	// Add the first point once
+	M[0][index] = A0.getX();
+	M[1][index] = A0.getY();
+	M[2][index] = A0.getZ();
+	++index;
+	for (int i = 1; i < n_r + 1; ++i) 
+	{
+		float r = R * (static_cast<float>(i) / n_r); // Progressive radius
+		for (int j = 0; j < n_t; ++j) 
+		{
+			double theta = 2 * M_PI * j / n_t; // Uniformly distributed angle
+			M[0][index] = static_cast<float>(A0.getX() + r * cosinus(theta));
+			M[1][index] = static_cast<float>(A0.getY() + r * sinus(theta));
+			M[2][index] = A0.getZ();
+			++index;
+
+			// Security check
+			if (index >= n) break;
+		}
+		if (index >= n) break;
+	}
 	return M;
 }

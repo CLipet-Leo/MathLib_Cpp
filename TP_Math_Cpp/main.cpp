@@ -12,7 +12,8 @@ int main()
 	//testRotation();
 	//testInertia();
 	//testPaveDroit();
-	testFactorielSinusCosinus();
+	//testFactorielSinusCosinus();
+	testCercle();
 	
 	_CrtSetReportMode(_CRT_WARN, _CRTDBG_MODE_DEBUG); 
 	_CrtDumpMemoryLeaks();

@@ -134,3 +134,10 @@ void testFactorielSinusCosinus()
     std::cout << "cos(" << x << ") = " << MathLib::cosinus(x, n) << " (vs std::cos(x) = " << std::cos(x) << ")\n";
     std::cout << "sin(" << x << ") = " << MathLib::sinus(x, n) << " (vs std::sin(x) = " << std::sin(x) << ")\n";
 }
+
+void testCercle()
+{
+    const FVector3 A0(0.f, 0.f, 0.f);
+    const Matrix result = MathLib::cercle_plein(1.f, A0, 20);
+    MathLib::printMatrix(result, "Cercle :");
+}
