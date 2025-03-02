@@ -8,3 +8,4 @@ void testInertia();
 void testPaveDroit();
 void testFactorielSinusCosinus();
 void testCercle();
+void testCylindre();

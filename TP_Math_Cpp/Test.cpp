@@ -117,9 +117,9 @@ void testInertia()
 void testPaveDroit()
 {
     const FVector3 A0(0.f, 0.f, 0.f);
-    constexpr unsigned int n = 8;
-    constexpr float a = 1.f;
-    constexpr float b = 2.f;
+    constexpr unsigned int n = 50;
+    constexpr float a = 3.f;
+    constexpr float b = 3.f;
     constexpr float c = 3.f;
     const Matrix result = MathLib::pave_plein(n, a, b, c, A0);
     MathLib::printMatrix(result, "Pave droit :");
@@ -138,6 +138,13 @@ void testFactorielSinusCosinus()
 void testCercle()
 {
     const FVector3 A0(0.f, 0.f, 0.f);
-    const Matrix result = MathLib::cercle_plein(1.f, A0, 20);
+    const Matrix result = MathLib::cercle_plein(1.f, A0, 15);
     MathLib::printMatrix(result, "Cercle :");
+}
+
+void testCylindre()
+{
+    const FVector3 A0(0.f, 0.f, 0.f);
+    const Matrix result = MathLib::cylindre_plein(1.f, 2.f, A0, 30);
+    MathLib::printMatrix(result, "Cylindre :");
 }

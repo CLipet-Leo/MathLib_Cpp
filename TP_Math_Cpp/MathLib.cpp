@@ -199,19 +199,25 @@ Matrix MathLib::deplace_matrix(const Matrix& I, float m, const FVector3& O, cons
  */
 Matrix MathLib::pave_plein(unsigned int n, float a, float b, float c, const FVector3& A0)
 {
-	const int iteration = static_cast<int>(pow(n, 1.f / 3.f));
+	// Calculate the number of iterations for each dimension
+	const int iteration = static_cast<int>(std::cbrt(n));
+	// Calculate the total number of points generated
+	const int totalPoints = static_cast<int>(std::pow(iteration, 3));
+	// Calculate the intervals between points in each dimension
 	const float dx = a / (iteration - 1);
 	const float dy = b / (iteration - 1);
 	const float dz = c / (iteration - 1);
-	Matrix M(3, n);
-	for (int i = 0; i < iteration; ++i)
-		for (int j = 0; j < iteration; ++j)
-			for (int k = 0; k < iteration; ++k)
+	Matrix M(3, totalPoints);
+	int index = 0;
+	for (int i = 0; i < iteration && index < n; ++i)
+		for (int j = 0; j < iteration && index < n; ++j)
+			for (int k = 0; k < iteration && index < n; ++k)
 			{
-				const int index = i * iteration * iteration + j * iteration + k;
+				// Calculate the coordinates of each points
 				M[0][index] = A0.getX() + i * dx;
 				M[1][index] = A0.getY() + j * dy;
 				M[2][index] = A0.getZ() + k * dz;
+				++index;
 			}
 	return M;
 }
@@ -225,16 +231,19 @@ Matrix MathLib::pave_plein(unsigned int n, float a, float b, float c, const FVec
  */
 Matrix MathLib::cercle_plein(float R, const FVector3& A0, int n)
 {
-	int n_r = static_cast<int>(std::sqrt(n)); // Subdivisions for the radius
-	int n_t = std::max(1, n / n_r); // Subdivisions for the angle
-	Matrix M(3, n);
+	int n_r = static_cast<int>(std::sqrt(n)); // Radial subdivisions
+	int n_t = std::max(1, n / n_r); // Angular subdivisions
+	// Calculating the actual number of points generated
+	int total_points = 1 + (n_r * n_t);
+	Matrix M(3, total_points);
 	int index = 0;
-	// Add the first point once
+	// Add the center only once
 	M[0][index] = A0.getX();
 	M[1][index] = A0.getY();
 	M[2][index] = A0.getZ();
 	++index;
-	for (int i = 1; i < n_r + 1; ++i) 
+	// Circle generation
+	for (int i = 1; i <= n_r; ++i) 
 	{
 		float r = R * (static_cast<float>(i) / n_r); // Progressive radius
 		for (int j = 0; j < n_t; ++j) 
@@ -244,11 +253,46 @@ Matrix MathLib::cercle_plein(float R, const FVector3& A0, int n)
 			M[1][index] = static_cast<float>(A0.getY() + r * sinus(theta));
 			M[2][index] = A0.getZ();
 			++index;
-
-			// Security check
-			if (index >= n) break;
 		}
-		if (index >= n) break;
+	}
+	return M;
+}
+
+Matrix MathLib::cylindre_plein(float R, float h, const FVector3& A0, int n)
+{
+	int n_base = static_cast<int>(std::sqrt(n)); // Points for each base
+	int n_cote = (n - 2 * n_base) / n_base;      // Points for each vertical segment
+	// Base generation
+	Matrix base_inf = cercle_plein(R, A0, n_base);
+	FVector3 A1(A0.getX(), A0.getY(), A0.getZ() + h);
+	Matrix base_sup = cercle_plein(R, A1, n_base);
+	// Creating the final matrix
+	Matrix M(3, n);
+	int index = 0;
+	// Adding bases
+	for (int i = 0; i < n_base; ++i) {
+		M[0][index] = base_inf[0][i];
+		M[1][index] = base_inf[1][i];
+		M[2][index] = base_inf[2][i];
+		++index;
+	}
+	for (int i = 0; i < n_base; ++i) {
+		M[0][index] = base_sup[0][i];
+		M[1][index] = base_sup[1][i];
+		M[2][index] = base_sup[2][i];
+		++index;
+	}
+	// Add lateral points between base_inf and base_sup
+	for (int i = 0; i < n_base; ++i) {
+		FVector3 P_inf(base_inf[0][i], base_inf[1][i], base_inf[2][i]);
+		FVector3 P_sup(base_sup[0][i], base_sup[1][i], base_sup[2][i]);
+		for (int j = 1; j < n_cote + 1; ++j) {
+			float t = static_cast<float>(j) / (n_cote + 1); // Interpolation
+			M[0][index] = P_inf.getX() * (1 - t) + P_sup.getX() * t;
+			M[1][index] = P_inf.getY() * (1 - t) + P_sup.getY() * t;
+			M[2][index] = P_inf.getZ() * (1 - t) + P_sup.getZ() * t;
+			++index;
+		}
 	}
 	return M;
 }

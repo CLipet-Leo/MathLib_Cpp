@@ -23,4 +23,5 @@ namespace MathLib
 	Matrix deplace_matrix(const Matrix& I, float m, const FVector3& O, const FVector3& A);
 	Matrix pave_plein(unsigned int n,float a,float b,float c,const FVector3& A0);
 	Matrix cercle_plein(float R,const FVector3& A0, int n = 100);
+	Matrix cylindre_plein(float R, float h, const FVector3& A0, int n = 1000);
 }
