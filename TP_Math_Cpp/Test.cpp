@@ -1,6 +1,11 @@
 ﻿#include "Test.h"
 
 #include "MathLib.h"
+#include "JsonConverter.h"
+
+#include <fstream>
+
+#define FILE_PATH "../json/data.json"
 
 void testProdMat()
 {
@@ -146,5 +151,8 @@ void testCylindre()
 {
     const FVector3 A0(0.f, 0.f, 0.f);
     const Matrix result = MathLib::cylindre_plein(1.f, 2.f, A0, 30);
+	std::ofstream file(FILE_PATH);
+	file << std::setfill(' ') << std::setw(2) << JsonConverter::MatrixToJson(result);
+	file.close();
     MathLib::printMatrix(result, "Cylindre :");
 }
