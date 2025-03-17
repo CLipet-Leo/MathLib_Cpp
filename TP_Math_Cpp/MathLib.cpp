@@ -296,3 +296,9 @@ Matrix MathLib::cylindre_plein(float R, float h, const FVector3& A0, int n)
 	}
 	return M;
 }
+
+MovementResult MathLib::mouvement(Matrix W, float m, Matrix I, FVector3 G, FVector3 v, FVector3 teta, FVector3 tetap,
+	std::vector<std::vector<FVector3>> F, std::vector<std::vector<FVector3>> A, float h)
+{
+	return {};
+}

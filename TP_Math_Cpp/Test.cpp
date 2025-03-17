@@ -5,7 +5,7 @@
 
 #include <fstream>
 
-#define FILE_PATH "../json/data.json"
+#define FILE_PATH "../data.json"
 
 void testProdMat()
 {
@@ -127,7 +127,10 @@ void testPaveDroit()
     constexpr float b = 3.f;
     constexpr float c = 3.f;
     const Matrix result = MathLib::pave_plein(n, a, b, c, A0);
-    MathLib::printMatrix(result, "Pave droit :");
+    std::ofstream file(FILE_PATH);
+    file << std::setfill(' ') << std::setw(2) << JsonConverter::MatrixToJson(result);
+    file.close();
+    //MathLib::printMatrix(result, "Pave droit :");
 }
 
 void testFactorielSinusCosinus()
@@ -150,9 +153,9 @@ void testCercle()
 void testCylindre()
 {
     const FVector3 A0(0.f, 0.f, 0.f);
-    const Matrix result = MathLib::cylindre_plein(1.f, 2.f, A0, 30);
+    const Matrix result = MathLib::cylindre_plein(1.f, 4.f, A0);
 	std::ofstream file(FILE_PATH);
 	file << std::setfill(' ') << std::setw(2) << JsonConverter::MatrixToJson(result);
 	file.close();
-    MathLib::printMatrix(result, "Cylindre :");
+    //MathLib::printMatrix(result, "Cylindre :");
 }

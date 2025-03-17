@@ -2,12 +2,15 @@
 
 #include "Matrix.h"
 #include "FVector3.h"
+#include "StructHeader.h"
 
 #include <vector>
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
 #endif
+
+struct MovementResult;
 
 namespace MathLib
 {
@@ -24,4 +27,6 @@ namespace MathLib
 	Matrix pave_plein(unsigned int n,float a,float b,float c,const FVector3& A0);
 	Matrix cercle_plein(float R,const FVector3& A0, int n = 100);
 	Matrix cylindre_plein(float R, float h, const FVector3& A0, int n = 1000);
+	MovementResult mouvement(Matrix W, float m, Matrix I, FVector3 G, FVector3 v, FVector3 teta, FVector3 tetap,
+		std::vector<std::vector<FVector3>> F, std::vector<std::vector<FVector3>> A, float h);
 }
