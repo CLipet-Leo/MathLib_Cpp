@@ -1,5 +1,6 @@
 #include "MathLib.h"
 
+#include <algorithm>
 #include <iostream>
 #include <string>
 
@@ -17,6 +18,18 @@ void MathLib::printMatrix(const Matrix& m, const char* text)
 float MathLib::solve1(float f, float fp, float h)
 {
 	return f + fp * h;
+}
+
+double MathLib::truncate(double value, int precision)
+{
+	double factor = std::pow(10.0, precision);
+	return std::floor(value * factor) / factor;
+}
+
+double MathLib::roundToPrecision(double value, int precision)
+{
+	double factor = std::pow(10.0f, precision);
+	return std::round(value * factor) / factor;
 }
 
 // Factorial function
@@ -37,15 +50,13 @@ unsigned long long MathLib::factoriel(unsigned int n)
 double MathLib::cosinus(double x, int n)
 {
 	double cos_x = 1.0; // First term of the Taylor series
-	double power_x = 1.0; // x^0 = 1
-	double factorial = 1.0; // 0! = 1
-	int sign = 1; // (-1)^i
+	double term = 1.0;
+	int sign = -1;  
 	for (int i = 1; i < n; ++i)
 	{
-		power_x *= x * x; // x^(2*i)
-		factorial *= (2 * i - 1) * (2 * i); // (2*i)!
-		sign = -sign; // Switch between + and -
-		cos_x += sign * (power_x / factorial);
+		term *= (x * x) / ((2 * i - 1) * (2 * i));
+		cos_x += sign * term;
+		sign = -sign;
 	}
 	return cos_x;
 }
@@ -59,15 +70,13 @@ double MathLib::cosinus(double x, int n)
 double MathLib::sinus(double x, int n)
 {
 	double sin_x = x; // First term of the Taylor series
-	double power_x = x; // x^1 = x
-	double factorial = 1.0; // 1! = 1
-	int sign = 1; // (-1)^i
+	double term = x;  
+	int sign = -1;  
 	for (int i = 1; i < n; ++i)
 	{
-		power_x *= x * x; // x^(2*i+1)
-		factorial *= 2 * i * (2 * i + 1); // (2*i+1)!
-		sign = -sign; // Switch between + and -
-		sin_x += sign * (power_x / factorial);
+		term *= (x * x) / ((2 * i) * (2 * i + 1));
+		sin_x += sign * term;
+		sign = -sign;
 	}
 	return sin_x;
 }
@@ -231,74 +240,130 @@ Matrix MathLib::pave_plein(unsigned int n, float a, float b, float c, const FVec
  */
 Matrix MathLib::cercle_plein(float R, const FVector3& A0, int n)
 {
-	int n_r = static_cast<int>(std::sqrt(n)); // Radial subdivisions
-	int n_t = std::max(1, n / n_r); // Angular subdivisions
-	// Calculating the actual number of points generated
-	int total_points = 1 + (n_r * n_t);
-	Matrix M(3, total_points);
+	n = std::max(n, 3); // Sécurisation
+	int n_r = n;  // `n_r` est le nombre d'anneaux
+	int n_total = n_r * n + 1;  // Nombre total de points (y compris centre)
+
+	Matrix M(3, n_total);
 	int index = 0;
-	// Add the center only once
+
+	// Ajouter le centre
 	M[0][index] = A0.getX();
 	M[1][index] = A0.getY();
 	M[2][index] = A0.getZ();
 	++index;
-	// Circle generation
-	for (int i = 1; i <= n_r; ++i) 
+
+	// Générer les anneaux
+	for (int i = 1; i <= n_r; ++i)
 	{
-		float r = R * (static_cast<float>(i) / n_r); // Progressive radius
-		for (int j = 0; j < n_t; ++j) 
+		double r = R * (static_cast<double>(i) / static_cast<double>(n_r)); // Rayon progressif
+		for (int j = 0; j < n; ++j)
 		{
-			double theta = 2 * M_PI * j / n_t; // Uniformly distributed angle
-			M[0][index] = static_cast<float>(A0.getX() + r * cosinus(theta));
-			M[1][index] = static_cast<float>(A0.getY() + r * sinus(theta));
+			double theta = 2.0 * M_PI * static_cast<double>(j) / static_cast<double>(n);
+			M[0][index] = A0.getX() + r * cosinus(theta);
+			M[1][index] = A0.getY() + r * sinus(theta);
 			M[2][index] = A0.getZ();
 			++index;
 		}
 	}
+
 	return M;
 }
 
-Matrix MathLib::cylindre_plein(float R, float h, const FVector3& A0, int n)
+/**
+ * Create a matrix of points in a cylinder
+ * @param R : radius
+ * @param h : height
+ * @param A0 : first point
+ * @param n : number of points per radius in each circle
+ * @param s_h : number of height slices
+ * @return : Matrix of points with 3 rows representing the coordinates X, Y and Z
+ */
+Matrix MathLib::cylindre_plein(float R, float h, const FVector3& A0, int n, int s_h)
 {
-	int n_base = static_cast<int>(std::sqrt(n)); // Points for each base
-	int n_cote = (n - 2 * n_base) / n_base;      // Points for each vertical segment
-	// Base generation
-	Matrix base_inf = cercle_plein(R, A0, n_base);
-	FVector3 A1(A0.getX(), A0.getY(), A0.getZ() + h);
-	Matrix base_sup = cercle_plein(R, A1, n_base);
-	// Creating the final matrix
-	Matrix M(3, n);
+	h = std::max<float>(h, 1);
+	n = std::max(n, 3);
+	s_h = std::max(s_h, 2);
+
+	int n_cercles = h * s_h;  // Nombre total de cercles générés
+	int n_r = n;  // Nombre d'anneaux radiaux dans chaque cercle
+	int n_total = n_cercles * (n_r * n + 1);  // Nombre total de points
+
+	Matrix M(3, n_total);
 	int index = 0;
-	// Adding bases
-	for (int i = 0; i < n_base; ++i) {
-		M[0][index] = base_inf[0][i];
-		M[1][index] = base_inf[1][i];
-		M[2][index] = base_inf[2][i];
-		++index;
-	}
-	for (int i = 0; i < n_base; ++i) {
-		M[0][index] = base_sup[0][i];
-		M[1][index] = base_sup[1][i];
-		M[2][index] = base_sup[2][i];
-		++index;
-	}
-	// Add lateral points between base_inf and base_sup
-	for (int i = 0; i < n_base; ++i) {
-		FVector3 P_inf(base_inf[0][i], base_inf[1][i], base_inf[2][i]);
-		FVector3 P_sup(base_sup[0][i], base_sup[1][i], base_sup[2][i]);
-		for (int j = 1; j < n_cote + 1; ++j) {
-			float t = static_cast<float>(j) / (n_cote + 1); // Interpolation
-			M[0][index] = P_inf.getX() * (1 - t) + P_sup.getX() * t;
-			M[1][index] = P_inf.getY() * (1 - t) + P_sup.getY() * t;
-			M[2][index] = P_inf.getZ() * (1 - t) + P_sup.getZ() * t;
+
+	for (int i = 0; i < n_cercles; ++i)
+	{
+		float z = A0.getZ() + static_cast<float>(i) / s_h;  // Hauteur en fonction de `s_h`
+
+		// Générer un cercle à cette hauteur avec `n` points par rayon
+		Matrix cercle = cercle_plein(R, FVector3(A0.getX(), A0.getY(), z), n);
+
+		// Ajouter les points du cercle dans `M`
+		for (int j = 0; j < cercle.getCols(); ++j)
+		{
+			M[0][index] = cercle[0][j];
+			M[1][index] = cercle[1][j];
+			M[2][index] = cercle[2][j];
 			++index;
 		}
 	}
+
 	return M;
 }
 
+/**
+ * Move a solid with a mass, an inertia matrix, a center of gravity, a linear speed, an angular vector and an angular speed
+ * @param W : Solid matrix
+ * @param m : mass
+ * @param I : Inertia matrix
+ * @param G : Center of gravity
+ * @param v : Linear speed
+ * @param teta : Angular vector
+ * @param tetap : Angular speed
+ * @param F : List of forces
+ * @param A : List of application points
+ * @param h : Time step
+ * @return : New solid matrix, center of gravity, linear speed, angular vector and angular speed
+ */
 MovementResult MathLib::mouvement(Matrix W, float m, Matrix I, FVector3 G, FVector3 v, FVector3 teta, FVector3 tetap,
 	std::vector<std::vector<FVector3>> F, std::vector<std::vector<FVector3>> A, float h)
 {
-	return {};
+	// 1. Calculer la translation
+	FVector3 totalForce = FVector3::Zero();
+	for (const auto& forces : F)
+		for (const auto& f : forces)
+			totalForce += f;
+
+	DoubleVector3 trans = translation(m, h, totalForce, G, v);
+	FVector3 newG = trans.v1;  // Nouveau centre d'inertie
+	FVector3 newV = trans.v2;  // Nouvelle vitesse linéaire
+
+	// 2. Calculer la rotation
+	std::vector<FVector3> forces_flattened, points_flattened;
+	for (const auto& forces : F) forces_flattened.insert(forces_flattened.end(), forces.begin(), forces.end());
+	for (const auto& points : A) points_flattened.insert(points_flattened.end(), points.begin(), points.end());
+
+	DoubleVector3 rot = rotation(h, forces_flattened, points_flattened, G, I, teta, tetap);
+	FVector3 newTeta = rot.v1;  // Nouveau vecteur angulaire
+	FVector3 newTetap = rot.v2;  // Nouvelle vitesse angulaire
+
+	// 3. Appliquer les transformations aux points du solide
+	Matrix newW = W;
+	for (int i = 0; i < W.getCols(); ++i)
+	{
+		FVector3 P(W[0][i], W[1][i], W[2][i]);
+
+		// Déplacer en fonction du nouveau centre d'inertie
+		P = P + (newG - G);
+
+		// Rotation autour du centre d'inertie (approximation simple)
+		P = P + newTeta * h;
+
+		newW[0][i] = P.getX();
+		newW[1][i] = P.getY();
+		newW[2][i] = P.getZ();
+	}
+
+	return { newW, newG, newV, newTeta, newTetap };
 }
