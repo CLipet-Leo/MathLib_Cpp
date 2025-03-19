@@ -146,16 +146,56 @@ void testFactorielSinusCosinus()
 void testCercle()
 {
     const FVector3 A0(0.f, 0.f, 0.f);
-    const Matrix result = MathLib::cercle_plein(1.f, A0, 15);
+    const Matrix result = MathLib::cercle_plein(1.f, A0);
+    std::ofstream file(FILE_PATH);
+    file << std::setfill(' ') << std::setw(2) << JsonConverter::MatrixToJson(result);
+    file.close();
     MathLib::printMatrix(result, "Cercle :");
 }
 
 void testCylindre()
 {
     const FVector3 A0(0.f, 0.f, 0.f);
-    const Matrix result = MathLib::cylindre_plein(1.f, 4.f, A0);
+    const Matrix result = MathLib::cylindre_plein(2.f, 4.f, A0);
 	std::ofstream file(FILE_PATH);
 	file << std::setfill(' ') << std::setw(2) << JsonConverter::MatrixToJson(result);
 	file.close();
-    //MathLib::printMatrix(result, "Cylindre :");
+    MathLib::printMatrix(result, "Cylindre :");
+}
+
+void testMouvement()
+{
+    // Définition du solide W (cylindre)
+    const FVector3 A0(0.f, 0.f, 0.f);
+    const Matrix W = MathLib::cylindre_plein(1.f, 4.f, A0);
+
+    // Masse et centre d'inertie
+    const float m = 10.f;
+    const FVector3 G(0.f, 0.f, 2.f); // Centre de l'objet
+    const FVector3 G1(0.f, 0.f, 4.f);
+
+    // Matrice d'inertie (diagonale pour simplifier)
+    Matrix I(3, 3);
+    I[0][0] = 5.f; I[1][1] = 5.f; I[2][2] = 5.f;
+
+    // Vitesse linéaire et angulaire
+    FVector3 v(0.f, 0.f, 1.f);
+    FVector3 teta(0.f, 0.f, 0.f);
+    FVector3 tetap(0.f, 0.f, 0.f);
+
+    // Définition des forces et points d'application
+    std::vector<std::vector<FVector3>> F = { { FVector3(0.f, 0.f, -9.81f * m), FVector3(3.f, 1.f, 0.f) } }; // Poids
+    std::vector<std::vector<FVector3>> A = { { G, G1 } }; // Force appliquée au centre de gravité
+
+    // Pas de temps
+    const float h = 1.0f;
+
+    // Exécution de la fonction
+    MovementResult result = MathLib::mouvement(W, m, I, G, v, teta, tetap, F, A, h);
+    result.print();
+
+    // Sauvegarde du résultat
+    std::ofstream file(FILE_PATH);
+    file << std::setfill(' ') << std::setw(2) << JsonConverter::MatrixToJson(result.newW);
+    file.close();
 }

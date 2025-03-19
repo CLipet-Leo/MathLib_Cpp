@@ -9,3 +9,4 @@ void testPaveDroit();
 void testFactorielSinusCosinus();
 void testCercle();
 void testCylindre();
+void testMouvement();
