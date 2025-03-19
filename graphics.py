@@ -1,6 +1,7 @@
 import json
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
+import numpy as np  # Add numpy for color normalization
 
 def plot_3d_coordinates(data_file):
     with open(data_file, encoding='utf-8') as f:
@@ -10,7 +11,12 @@ def plot_3d_coordinates(data_file):
     
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
-    ax.scatter(x, y, z)
+    
+    # Normalize y values for color mapping
+    norm = plt.Normalize(min(z), max(z))
+    colors = plt.cm.get_cmap('viridis')(norm(z))  # Use 'viridis' colormap for gradient
+    
+    ax.scatter(x, y, z, c=colors)
     
     ax.set_xlabel('X Label')
     ax.set_ylabel('Y Label')
