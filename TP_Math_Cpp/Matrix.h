@@ -10,7 +10,7 @@ class Matrix
 {
 public:
     Matrix(int rows, int cols);
-    Matrix(const Matrix& other) = default;
+    Matrix(const Matrix& other);
     virtual ~Matrix();
 
     // Conversion operators

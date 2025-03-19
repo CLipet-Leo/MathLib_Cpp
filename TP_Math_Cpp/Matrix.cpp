@@ -18,6 +18,17 @@ Matrix::Matrix(int rows, int cols)
     }
 }
 
+Matrix::Matrix(const Matrix& other) 
+    : rows(other.getRows()), cols(other.getCols())
+{
+    // Allouer une nouvelle mémoire
+    data = new float* [rows];
+    for (int i = 0; i < rows; i++) {
+        data[i] = new float[cols];
+        std::copy(other.data[i], other.data[i] + cols, data[i]);
+    }
+}
+
 Matrix::~Matrix()
 {
     for (int i = 0; i < rows; i++)
