@@ -2,6 +2,7 @@
 
 #include <string>
 
+class FVector3;
 
 /**
  * Class to represent a matrix with float values
@@ -10,16 +11,18 @@ class Matrix
 {
 public:
     Matrix(int rows, int cols);
+    Matrix(std::initializer_list<std::initializer_list<float>> list);
     Matrix(const Matrix& other);
     virtual ~Matrix();
 
     // Conversion operators
-    Matrix& operator=(const Matrix& other) = default;
+    Matrix& operator=(Matrix other);
     Matrix& operator+=(const Matrix& other);
     float* operator[](int row);
     const float* operator[](int row) const;
     Matrix operator*(const Matrix& other) const;
     Matrix operator*(float value) const;
+    FVector3 operator*(FVector3 vector) const;
     Matrix operator+(const Matrix& other) const;
 
     // Getters

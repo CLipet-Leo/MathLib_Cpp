@@ -1,4 +1,5 @@
 ﻿#include "Matrix.h"
+#include "FVector3.h"
 
 #include <algorithm>
 #include <iomanip>
@@ -18,14 +19,41 @@ Matrix::Matrix(int rows, int cols)
     }
 }
 
-Matrix::Matrix(const Matrix& other) 
+Matrix::Matrix(std::initializer_list<std::initializer_list<float>> list)
+{
+    rows = list.size();
+    cols = list.begin()->size();
+    data = new float* [rows];
+    int i = 0;
+    for (const auto& row : list)
+    {
+        data[i] = new float[cols];
+        int j = 0;
+        for (const auto& elem : row)
+        {
+            data[i][j] = elem;
+            ++j;
+        }
+        ++i;
+    }
+}
+
+Matrix::Matrix(const Matrix& other)
     : rows(other.getRows()), cols(other.getCols())
 {
-    // Allouer une nouvelle mémoire
     data = new float* [rows];
-    for (int i = 0; i < rows; i++) {
-        data[i] = new float[cols];
-        std::copy(other.data[i], other.data[i] + cols, data[i]);
+    try {
+        for (int i = 0; i < rows; i++) {
+            data[i] = new float[cols];
+            std::copy(other.data[i], other.data[i] + cols, data[i]);
+        }
+    }
+    catch (...) {
+        for (int i = 0; i < rows; i++) {
+            delete[] data[i];
+        }
+        delete[] data;
+        throw;
     }
 }
 
@@ -34,6 +62,13 @@ Matrix::~Matrix()
     for (int i = 0; i < rows; i++)
         delete[] data[i];
     delete[] data;
+}
+
+Matrix& Matrix::operator=(Matrix other) {
+    std::swap(rows, other.rows);
+    std::swap(cols, other.cols);
+    std::swap(data, other.data);
+    return *this;
 }
 
 Matrix& Matrix::operator+=(const Matrix& other)
@@ -78,6 +113,17 @@ Matrix Matrix::operator*(float value) const
         for (int j = 0; j < cols; j++)
             result[i][j] = data[i][j] * value;
     return result;
+}
+
+FVector3 Matrix::operator*(FVector3 vector) const
+{
+	if (cols != 3)
+		throw std::invalid_argument("Matrix must have 3 columns to multiply with FVector3.");
+	return {
+		vector.getX() * data[0][0] + vector.getY() * data[0][1] + vector.getZ() * data[0][2],
+		vector.getX() * data[1][0] + vector.getY() * data[1][1] + vector.getZ() * data[1][2],
+		vector.getX() * data[2][0] + vector.getY() * data[2][1] + vector.getZ() * data[2][2]
+	};
 }
 
 Matrix Matrix::operator+(const Matrix& other) const

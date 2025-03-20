@@ -26,9 +26,12 @@ namespace MathLib
 	FVector3 centre_inert(const std::vector<FVector3>& L);
 	Matrix matrice_inert(const std::vector<FVector3>& L, float m);
 	Matrix deplace_matrix(const Matrix& I, float m, const FVector3& O, const FVector3& A);
+	Matrix rotation_forme(Matrix W, const FVector3& G, const FVector3& teta);
 	Matrix pave_plein(unsigned int n,float a,float b,float c,const FVector3& A0);
 	Matrix cercle_plein(float R,const FVector3& A0, int n = 8);
 	Matrix cylindre_plein(float R, float h, const FVector3& A0, int n = 8, int s_h = 6);
 	MovementResult mouvement(Matrix W, float m, Matrix I, FVector3 G, FVector3 v, FVector3 teta, FVector3 tetap,
 		std::vector<std::vector<FVector3>> F, std::vector<std::vector<FVector3>> A, float h);
+	std::vector<Matrix> trace_mouvements(Matrix W, float m, Matrix I, FVector3 G, FVector3 v, FVector3 teta, FVector3 tetap,
+		const std::vector<std::vector<FVector3>>& F, const std::vector<std::vector<FVector3>>& A, float h, float t, int n);
 }

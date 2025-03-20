@@ -114,16 +114,19 @@ DoubleVector3 MathLib::rotation(float h, const std::vector<FVector3>& F, const s
 	if (F.size() != A.size())
 		throw std::invalid_argument("F and A must have the same size");
 	
-	FVector3 newG = FVector3::Zero();
-	for (int i = 0; i < F.size(); ++i)
-		newG += FVector3::moment(F[i], A[i], G);
+	FVector3 torque = FVector3::Zero();
+	for (size_t i = 0; i < F.size(); ++i)
+		torque = torque + FVector3::moment(F[i], A[i], G);
 
-	// Angular acceleration
-	FVector3 omegaDot = newG * Matrix::inverse(I);
-	FVector3 newTetap = tetap + omegaDot * h;
-	FVector3 newTeta = teta + newTetap * h;
+	// Calculate angular acceleration
+	Matrix I_inv = Matrix::inverse(I);
+	FVector3 angularAcc = I_inv * torque;
 
-	return { newTeta, newTetap };
+	// Update angular speed and angle
+	FVector3 newAngularVel = tetap + angularAcc * h;
+	FVector3 newAngles = teta + newAngularVel * h;
+
+	return { newAngles, newAngularVel };
 }
 
 /**
@@ -172,12 +175,12 @@ Matrix MathLib::matrice_inert(const std::vector<FVector3>& L, float m)
 }
 
 /**
- * Move a matrix
- * @param I : Matrix to deplace
+ * Move an inertia matrix
+ * @param I : Matrix to move
  * @param m : mass
- * @param O : point O
- * @param A : point A
- * @return : Deplaced matrix
+ * @param O : Origin point
+ * @param A : Arrival point
+ * @return : Moved matrix to point A
  */
 Matrix MathLib::deplace_matrix(const Matrix& I, float m, const FVector3& O, const FVector3& A)
 {
@@ -195,6 +198,53 @@ Matrix MathLib::deplace_matrix(const Matrix& I, float m, const FVector3& O, cons
 	IOA[2][1] = -m * OA.getY() * OA.getZ();
 	IOA[2][2] = m * (pow(OA.getX(), 2.f) + pow(OA.getY(), 2.f));
 	return I + IOA;
+}
+
+Matrix MathLib::rotation_forme(Matrix W, const FVector3& G, const FVector3& teta)
+{
+	// Extract the angles
+	float thetaX = teta.getX();
+	float thetaY = teta.getY();
+	float thetaZ = teta.getZ();
+
+	// Build the rotation matrices
+	float cX = static_cast<float>(cosinus(thetaX));
+	float sX = static_cast<float>(sinus(thetaX));
+	float cY = static_cast<float>(cosinus(thetaY));
+	float sY = static_cast<float>(sinus(thetaY));
+	float cZ = static_cast<float>(cosinus(thetaZ));
+	float sZ = static_cast<float>(sinus(thetaZ));
+	Matrix Rx = {
+		{1, 0, 0},
+		{0, cX, -sX},
+		{0, sX,  cX}
+	};
+	Matrix Ry = {
+		{ cY, 0, sY},
+		{  0, 1,  0},
+		{-sY, 0, cY}
+	};
+	Matrix Rz = {
+		{ cZ, -sZ, 0},
+		{ sZ,  cZ, 0},
+		{  0,   0, 1}
+	};
+
+	// Combined rotation matrix
+	Matrix R = Rz * Ry * Rx;
+
+	// Apply the rotation to each point
+	for (int i = 0; i < W.getCols(); i++)
+	{
+		FVector3 P(W[0][i], W[1][i], W[2][i]);
+		FVector3 P_rotated = R * (P - G) + G;
+
+		W[0][i] = P_rotated.getX();
+		W[1][i] = P_rotated.getY();
+		W[2][i] = P_rotated.getZ();
+	}
+
+	return W;
 }
 
 /**
@@ -285,21 +335,21 @@ Matrix MathLib::cylindre_plein(float R, float h, const FVector3& A0, int n, int 
 	n = std::max(n, 3);
 	s_h = std::max(s_h, 2);
 
-	int n_cercles = h * s_h;  // Nombre total de cercles générés
-	int n_r = n;  // Nombre d'anneaux radiaux dans chaque cercle
-	int n_total = n_cercles * (n_r * n + 1);  // Nombre total de points
+	int n_cercles = h * s_h;  // Total number of circles
+	int n_r = n;  // Number of points per radius in each circle
+	int n_total = n_cercles * (n_r * n + 1);  // Total number of points (including center)
 
 	Matrix M(3, n_total);
 	int index = 0;
 
 	for (int i = 0; i < n_cercles; ++i)
 	{
-		float z = A0.getZ() + static_cast<float>(i) / s_h;  // Hauteur en fonction de `s_h`
+		float z = A0.getZ() + static_cast<float>(i) / s_h;  // Height of the circle
 
-		// Générer un cercle à cette hauteur avec `n` points par rayon
+		// Generate a circle at height `z`
 		Matrix cercle = cercle_plein(R, FVector3(A0.getX(), A0.getY(), z), n);
 
-		// Ajouter les points du cercle dans `M`
+		// Add the circle to the matrix
 		for (int j = 0; j < cercle.getCols(); ++j)
 		{
 			M[0][index] = cercle[0][j];
@@ -329,41 +379,60 @@ Matrix MathLib::cylindre_plein(float R, float h, const FVector3& A0, int n, int 
 MovementResult MathLib::mouvement(Matrix W, float m, Matrix I, FVector3 G, FVector3 v, FVector3 teta, FVector3 tetap,
 	std::vector<std::vector<FVector3>> F, std::vector<std::vector<FVector3>> A, float h)
 {
-	// 1. Calculer la translation
 	FVector3 totalForce = FVector3::Zero();
-	for (const auto& forces : F)
-		for (const auto& f : forces)
-			totalForce += f;
-
+	for (const auto& forceList : F)
+		for (const auto& f : forceList)
+			totalForce = totalForce + f;
+	
 	DoubleVector3 trans = translation(m, h, totalForce, G, v);
-	FVector3 newG = trans.v1;  // Nouveau centre d'inertie
-	FVector3 newV = trans.v2;  // Nouvelle vitesse linéaire
+	FVector3 newG = trans.v1; // Nouveau centre d'inertie
+	FVector3 newV = trans.v2; // Nouvelle vitesse linéaire
+	
+	// Prepare the forces and points for the rotation calculation
+	std::vector<FVector3> forcesFlat, pointsFlat;
+	for (const auto& liste : F)
+	    forcesFlat.insert(forcesFlat.end(), liste.begin(), liste.end());
+	for (const auto& liste : A)
+	    pointsFlat.insert(pointsFlat.end(), liste.begin(), liste.end());
+	
+	// Calculate the new angles and angular speed
+	DoubleVector3 rot = rotation(h, forcesFlat, pointsFlat, G, I, teta, tetap);
+	FVector3 newAngles = rot.v1;
+	FVector3 newAngularVel = rot.v2;
 
-	// 2. Calculer la rotation
-	std::vector<FVector3> forces_flattened, points_flattened;
-	for (const auto& forces : F) forces_flattened.insert(forces_flattened.end(), forces.begin(), forces.end());
-	for (const auto& points : A) points_flattened.insert(points_flattened.end(), points.begin(), points.end());
+	// Update the inertia matrix
+	Matrix newI = deplace_matrix(I, m, G, newG);
 
-	DoubleVector3 rot = rotation(h, forces_flattened, points_flattened, G, I, teta, tetap);
-	FVector3 newTeta = rot.v1;  // Nouveau vecteur angulaire
-	FVector3 newTetap = rot.v2;  // Nouvelle vitesse angulaire
+	// Apply the rotation to the solid
+	Matrix newW = rotation_forme(W, newG, newAngles);
 
-	// 3. Appliquer les transformations aux points du solide
-	Matrix newW = W;
-	for (int i = 0; i < W.getCols(); ++i)
+	return { newW, newG, newV, newAngles, newAngularVel };
+}
+
+std::vector<Matrix> MathLib::trace_mouvements(Matrix W, float m, Matrix I, FVector3 G, FVector3 v, FVector3 teta,
+	FVector3 tetap, const std::vector<std::vector<FVector3>>& F, const std::vector<std::vector<FVector3>>& A, float h,
+	float t, int n)
+{
+	// Vector to store the snapshots
+	std::vector<Matrix> snapshots;
+	snapshots.reserve(n);
+
+	h = t / static_cast<float>(n);
+
+	for (int i = 0; i < n; i++)
 	{
-		FVector3 P(W[0][i], W[1][i], W[2][i]);
+		// Call the movement function
+		MovementResult result = mouvement(W, m, I, G, v, teta, tetap, F, A, h);
 
-		// Déplacer en fonction du nouveau centre d'inertie
-		P = P + (newG - G);
+		// Stock the new matrix in the vector
+		snapshots.push_back(result.newW);
 
-		// Rotation autour du centre d'inertie (approximation simple)
-		P = P + newTeta * h;
-
-		newW[0][i] = P.getX();
-		newW[1][i] = P.getY();
-		newW[2][i] = P.getZ();
+		W     = result.newW;
+		G     = result.newG;
+		v     = result.newV;
+		teta  = result.newTeta;
+		tetap = result.newTetap;
 	}
 
-	return { newW, newG, newV, newTeta, newTetap };
+	return snapshots;
 }

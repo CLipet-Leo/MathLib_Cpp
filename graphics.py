@@ -14,13 +14,16 @@ def plot_3d_coordinates(data_file):
     
     # Normalize y values for color mapping
     norm = plt.Normalize(min(z), max(z))
-    colors = plt.cm.get_cmap('viridis')(norm(z))  # Use 'viridis' colormap for gradient
+    colors = plt.colormaps.get_cmap('viridis')(norm(z))  # Use 'viridis' colormap for gradient
     
     ax.scatter(x, y, z, c=colors)
     
     ax.set_xlabel('X Label')
     ax.set_ylabel('Y Label')
     ax.set_zlabel('Z Label')
+        
+    # Set equal aspect ratio
+    ax.set_box_aspect([1,1,1])
     
     plt.show()
 

@@ -165,37 +165,63 @@ void testCylindre()
 
 void testMouvement()
 {
-    // Définition du solide W (cylindre)
-    const FVector3 A0(0.f, 0.f, 0.f);
-    const Matrix W = MathLib::cylindre_plein(1.f, 4.f, A0);
+   // Paramètres du cylindre
+    float R = 1.0f;
+    float height = 4.0f;
+    FVector3 base(0, 0, 0);
 
-    // Masse et centre d'inertie
-    const float m = 10.f;
-    const FVector3 G(0.f, 0.f, 2.f); // Centre de l'objet
-    const FVector3 G1(0.f, 0.f, 4.f);
+    // Création d'un cylindre plein
+    Matrix cylindre = MathLib::cylindre_plein(R, height, base);
 
-    // Matrice d'inertie (diagonale pour simplifier)
-    Matrix I(3, 3);
-    I[0][0] = 5.f; I[1][1] = 5.f; I[2][2] = 5.f;
+    // Extraction des points du cylindre dans un vecteur pour le calcul du centre et de la matrice d'inertie
+    std::vector<FVector3> points;
+    for (int i = 0; i < cylindre.getCols(); ++i)
+        points.push_back(FVector3(cylindre[0][i], cylindre[1][i], cylindre[2][i]));
 
-    // Vitesse linéaire et angulaire
-    FVector3 v(0.f, 0.f, 1.f);
-    FVector3 teta(0.f, 0.f, 0.f);
-    FVector3 tetap(0.f, 0.f, 0.f);
+    // Calcul du centre d'inertie et de la matrice d'inertie (pour une masse totale donnée)
+    float m = 10.0f;
+    FVector3 centreInertie = MathLib::centre_inert(points);
+    Matrix inertia = MathLib::matrice_inert(points, m);
 
-    // Définition des forces et points d'application
-    std::vector<std::vector<FVector3>> F = { { FVector3(0.f, 0.f, -9.81f * m), FVector3(3.f, 1.f, 0.f) } }; // Poids
-    std::vector<std::vector<FVector3>> A = { { G, G1 } }; // Force appliquée au centre de gravité
+    // Conditions initiales (au repos)
+    FVector3 vitesseLineaire(0, 0, 0);
+    FVector3 anglesInitiaux(0, 0, 0);
+    FVector3 vitesseAngulaire(0, 0, 0);
 
-    // Pas de temps
-    const float h = 1.0f;
+    // Définition des forces :
+    // - Gravité appliquée au centre (translation) : ici, on suppose la gravité dirigée vers le bas sur l'axe Z.
+    FVector3 forceGravite(0, 0, -9.81f * m);
 
-    // Exécution de la fonction
-    MovementResult result = MathLib::mouvement(W, m, I, G, v, teta, tetap, F, A, h);
-    result.print();
+    // - Force horizontale appliquée sur le point le plus haut pour induire une rotation.
+    // On cherche le point dont la coordonnée Z est maximale dans le cylindre.
+    FVector3 pointHaut = points[0];
+    for (const auto &p : points)
+        if (p.getZ() > pointHaut.getZ())
+            pointHaut = p;
+    // Force horizontale (par exemple, selon l'axe X) appliquée sur ce point
+    FVector3 forceExtra(50, 0, 0);
+
+    // Construction des listes de forces et points d'application (les deux forces sont dans des sous-listes distinctes)
+    std::vector<std::vector<FVector3>> forces;
+    std::vector<std::vector<FVector3>> pointsApplication;
+    // Gravité appliquée au centre d'inertie (n'affecte que la translation)
+    forces.push_back({ forceGravite });
+    pointsApplication.push_back({ centreInertie });
+    // Force supplémentaire appliquée en haut (génère un moment pour la rotation)
+    forces.push_back({ forceExtra });
+    pointsApplication.push_back({ pointHaut });
+
+    // Choix du pas de temps
+    float dt = 0.1f;
+    float T = 1.f;
+    int n = 5;
+    
+    // Appel de la fonction de mouvement qui met à jour translation et rotation
+    std::vector<Matrix> results = MathLib::trace_mouvements(cylindre, m, inertia, centreInertie, vitesseLineaire,
+                                                 anglesInitiaux, vitesseAngulaire, forces, pointsApplication, dt, T, n);
 
     // Sauvegarde du résultat
     std::ofstream file(FILE_PATH);
-    file << std::setfill(' ') << std::setw(2) << JsonConverter::MatrixToJson(result.newW);
+    file << std::setfill(' ') << std::setw(2) << JsonConverter::MatrixToJson(results[3]);
     file.close();
 }
